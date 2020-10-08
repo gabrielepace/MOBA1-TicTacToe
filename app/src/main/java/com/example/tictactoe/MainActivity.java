@@ -53,18 +53,17 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //this crashes for some reason
-//        RelativeLayout rl = findViewById(R.id.navigation_home);
-//        rl.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                if(event.getAction() == MotionEvent.ACTION_DOWN){
-//                    Log.i("app", event.getX() + "");
-//                }
-//
-//                return true;
-//            }
-//        });
-
+        /*
+        RelativeLayout rl = findViewById(R.id.navigation_home);
+        rl.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    Log.i("app", event.getX() + "");
+                }
+                return true;
+            }
+        });
+*/
     }
-
 }
