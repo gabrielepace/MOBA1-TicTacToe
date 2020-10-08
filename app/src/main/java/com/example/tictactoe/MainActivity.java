@@ -9,10 +9,13 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import android.os.Bundle;
+
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,13 +34,37 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navView, navController);
 
 
-        Button btn = findViewById(R.id.startbtn);
+        Button btn = findViewById(R.id.exitbtn);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.i("app", "test");
             }
         });
+
+        findViewById(R.id.testbtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("app", "test2");
+                ImageView iv = (ImageView)findViewById(R.id.tile1);
+                iv.setImageResource(R.drawable.circle);
+
+            }
+        });
+
+        //this crashes for some reason
+//        RelativeLayout rl = findViewById(R.id.navigation_home);
+//        rl.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                if(event.getAction() == MotionEvent.ACTION_DOWN){
+//                    Log.i("app", event.getX() + "");
+//                }
+//
+//                return true;
+//            }
+//        });
+
     }
 
 }
