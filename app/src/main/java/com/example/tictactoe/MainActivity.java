@@ -19,6 +19,9 @@ import android.widget.RelativeLayout;
 
 public class MainActivity extends AppCompatActivity {
 
+    static boolean circle = true;
+    int[][] grid = {{0,0,0},{0,0,0},{0,0,0}};//0 = empty, 1 = circle, 2 = cross
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,18 +55,39 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //this crashes for some reason
-//        RelativeLayout rl = findViewById(R.id.navigation_home);
-//        rl.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                if(event.getAction() == MotionEvent.ACTION_DOWN){
-//                    Log.i("app", event.getX() + "");
-//                }
-//
-//                return true;
-//            }
-//        });
+
+
+        RelativeLayout rl = findViewById(R.id.gameTouch);
+        rl.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    Log.i("app", event.getX() + " " + event.getY());
+                    int x = Math.round((event.getX())/233);
+                    int y = Math.round((event.getY())/233);
+                    Log.i("app", x+ " " + y);
+
+                    ImageView iv = null;
+                    if(x==1&&y==1)iv = findViewById(R.id.tile1);
+                    if(x==2&&y==1)iv = findViewById(R.id.tile2);
+                    if(x==3&&y==1)iv = findViewById(R.id.tile3);
+                    if(x==1&&y==2)iv = findViewById(R.id.tile4);
+                    if(x==2&&y==2)iv = findViewById(R.id.tile5);
+                    if(x==3&&y==2)iv = findViewById(R.id.tile6);
+                    if(x==1&&y==3)iv = findViewById(R.id.tile7);
+                    if(x==2&&y==3)iv = findViewById(R.id.tile8);
+                    if(x==3&&y==3)iv = findViewById(R.id.tile9);
+                    if(iv!=null && grid[x-1][y-1] == 0){
+                        grid[x-1][y-1] = circle ? 1 : 2;
+                        iv.setImageResource(circle ? R.drawable.circle : R.drawable.cross);
+                        circle=!circle;
+                    }
+
+                }
+
+                return true;
+            }
+        });
 
     }
 
