@@ -32,53 +32,11 @@
         app:navGraph="@navigation/mobile_navigation" />
 
     <Button
-        android:id="@+id/exitbtn"
+        android:id="@+id/startbtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
-        android:layout_marginTop="32dp"
-        android:text="exit"
-        app:layout_constraintStart_toStartOf="@+id/nav_host_fragment"
-        app:layout_constraintTop_toTopOf="@+id/nav_host_fragment" />
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="144dp"
-        android:layout_marginTop="24dp"
-        android:text="player 1 is circle"
-        app:layout_constraintStart_toStartOf="@+id/nav_host_fragment"
-        app:layout_constraintTop_toTopOf="@+id/nav_host_fragment" />
-
-    <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="223dp"
-        android:layout_height="296dp"
-        android:layout_marginStart="80dp"
-        android:layout_marginTop="160dp"
-        app:layout_constraintStart_toStartOf="@+id/nav_host_fragment"
-        app:layout_constraintTop_toTopOf="@+id/nav_host_fragment"
-        app:srcCompat="@drawable/grid" />
-
-    <ImageView
-        android:id="@+id/tile1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="156dp"
-        android:layout_marginTop="288dp"
-        app:layout_constraintStart_toStartOf="@+id/nav_host_fragment"
-        app:layout_constraintTop_toTopOf="@+id/nav_host_fragment"
-        app:srcCompat="@drawable/blank" />
-
-    <Button
-        android:id="@+id/testbtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="56dp"
-        android:layout_marginTop="472dp"
-        android:text="test"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/nav_host_fragment" />
+        android:text="start"
+        tools:layout_editor_absoluteX="47dp"
+        tools:layout_editor_absoluteY="185dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
