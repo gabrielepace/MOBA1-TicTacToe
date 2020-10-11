@@ -10,6 +10,33 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Base64;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -28,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     {0,3,6}, {1,4,7}, {2,5,8}, // columns
                     {0,4,8}, {2,4,6} // diagonals
     };
+
+    private WebSocket webSocket;
 
 
 
@@ -52,6 +81,56 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         playerOneScoreCount = 0;
         playerTwoScoreCount = 0;
         activePlayer = true;
+
+        findViewById(R.id.onlinebtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("app","going online");
+                OkHttpClient client = new OkHttpClient();
+                Request request = new Request.Builder().url("wss://echo.websocket.org").build();//"wss://echo.websocket.org""ws://localhost:3001/""ws://178.82.64.27:3001/""ws://moba1.herokuapp.com/"
+                webSocket = client.newWebSocket(request, new SocketListener());
+
+
+
+
+            }
+        });
+
+        reset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playAgain();
+                playerOneScoreCount = 0;
+                playerTwoScoreCount = 0;
+                playerStatus.setText("");
+                updatePlayerScore();
+            }
+        });
+    }
+
+    private class SocketListener extends WebSocketListener {
+
+        @Override
+        public void onOpen(WebSocket webSocket, Response response) {
+            super.onOpen(webSocket, response);
+            Log.i("app","onOpen success");
+
+
+        }
+
+        @Override
+        public void onMessage(WebSocket webSocket, final String text) {
+            super.onMessage(webSocket, text);
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.i("app","onMessage " + text);
+
+                }
+            });
+
+        }
     }
 
     @Override
@@ -59,6 +138,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!((Button) v).getText().toString().equals("")) {
             return;
         }
+
+        try {
+            if(webSocket != null){
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("message", "2,2,2,2,2,2,2,2,2");
+
+                webSocket.send(jsonObject.toString());
+                Log.i("app","sent msg");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
         String buttonId = v.getResources().getResourceEntryName(v.getId());
         int gameStatePointer = Integer.parseInt(buttonId.substring(buttonId.length() - 1, buttonId.length()));
 
@@ -100,16 +193,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             playerStatus.setText("");
         }
 
-        reset.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                playAgain();
-                playerOneScoreCount = 0;
-                playerTwoScoreCount = 0;
-                playerStatus.setText("");
-                updatePlayerScore();
-            }
-        });
+
 
     }
 

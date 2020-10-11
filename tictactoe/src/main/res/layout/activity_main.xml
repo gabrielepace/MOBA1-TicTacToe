@@ -172,4 +172,14 @@
         app:layout_constraintTop_toBottomOf="@id/btn_7"
         app:layout_constraintRight_toRightOf="@+id/btn_7"/>
 
+    <Button
+        android:id="@+id/onlinebtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="28dp"
+        android:text="go online (WIP)"
+        app:layout_constraintStart_toStartOf="@+id/reset"
+        app:layout_constraintTop_toBottomOf="@+id/reset" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
