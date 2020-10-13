@@ -1,9 +1,12 @@
 package com.example.tictactoe;
 
+import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -17,13 +20,24 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+
 public class MainActivity extends AppCompatActivity {
 
-    static boolean circle = true;
-    int[][] grid = {{0,0,0},{0,0,0},{0,0,0}};//0 = empty, 1 = circle, 2 = cross
+    static boolean circle;
+    int[][] grid;
+    ImageView iv;
 
+    public void setupGame(){
+        circle = true;
+        grid = new int[][]{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};//0 = empty, 1 = circle, 2 = cross
+        iv = null;
+    }
+
+
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setupGame();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
@@ -59,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
         RelativeLayout rl = findViewById(R.id.gameTouch);
         rl.setOnTouchListener(new View.OnTouchListener() {
+            @SuppressLint("ClickableViewAccessibility")
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_DOWN){
@@ -67,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
                     int y = Math.round((event.getY())/233);
                     Log.i("app", x+ " " + y);
 
-                    ImageView iv = null;
                     if(x==1&&y==1)iv = findViewById(R.id.tile1);
                     if(x==2&&y==1)iv = findViewById(R.id.tile2);
                     if(x==3&&y==1)iv = findViewById(R.id.tile3);
@@ -79,16 +93,86 @@ public class MainActivity extends AppCompatActivity {
                     if(x==3&&y==3)iv = findViewById(R.id.tile9);
                     if(iv!=null && grid[x-1][y-1] == 0){
                         grid[x-1][y-1] = circle ? 1 : 2;
+                        int turn = grid[x-1][y-1];
                         iv.setImageResource(circle ? R.drawable.circle : R.drawable.cross);
                         circle=!circle;
+                        if(checkWinner(turn) == turn){
+                            setWinner(turn);
+                        }
+
                     }
-
                 }
-
                 return true;
             }
         });
 
+
+
     }
 
+    public int checkWinner(int turn){
+        if((grid[1-1][1-1] == turn) && (grid[1-1][2-1] == turn) && (grid[1-1][3-1] == turn)){
+            return turn;
+        }
+        if((grid[2-1][1-1] == turn) && (grid[2-1][2-1] == turn) && (grid[2-1][3-1] == turn)){
+            return turn;
+        }
+        if((grid[3-1][1-1] == turn) && (grid[3-1][2-1] == turn) && (grid[3-1][3-1] == turn)){
+            return turn;
+        }
+        if((grid[1-1][1-1] == turn) && (grid[2-1][1-1] == turn) && (grid[3-1][1-1] == turn)){
+            return turn;
+        }
+        if((grid[1-1][2-1] == turn) && (grid[2-1][2-1] == turn) && (grid[3-1][2-1] == turn)){
+            return turn;
+        }
+        if((grid[1-1][3-1] == turn) && (grid[2-1][3-1] == turn) && (grid[3-1][3-1] == turn)){
+            return turn;
+        }
+
+        if((grid[1-1][1-1] == turn) && (grid[2-1][2-1] == turn) && (grid[3-1][3-1] == turn)){
+            return turn;
+        }
+
+        if((grid[3-1][1-1] == turn) && (grid[2-1][2-1] == turn) && (grid[1-1][3-1] == turn)){
+            return turn;
+        }
+        else{
+            return 0;
+        }
+    }
+
+    public void setWinner(int t){
+        String winner = "";
+        switch(t) {
+            case 1:
+                Log.i("winner ist:", "Kreis" );
+                winner = "Kreis";
+                break;
+            case 2:
+                Log.i("winner ist:", " Kreuz");
+                winner = "Kreuz";
+                break;
+        }
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage("Der Gewinner ist "+ winner );
+
+        alertDialogBuilder.setPositiveButton("Nochmals Spielen?", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+
+        alertDialogBuilder.setNegativeButton("Spiel verlassen",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
 }
