@@ -7257,7 +7257,7 @@ function toArray(list, index) {
   
   
 
-  var wsUri = "ws://moba1.herokuapp.com/";
+  var wsUri = "ws://80.218.189.9:3001";
   var output;
   
 
@@ -7285,7 +7285,7 @@ function toArray(list, index) {
   function onOpen(evt)
   {
     writeToScreen("CONNECTED");
-    doSend("WebSocket rocks");
+    //doSend("WebSocket rocks");
   }
 
   function onClose(evt)

@@ -31,6 +31,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -44,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button[] buttons = new Button[9];
     private Button reset;
 
-    private int playerOneScoreCount, playerTwoScoreCount, roundCount;
+    private int playerOneScoreCount, playerTwoScoreCount;
 
     public boolean activePlayer;
 
@@ -57,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     };
 
     private WebSocket webSocket;
+
+    boolean online = false;
 
 
 
@@ -77,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             buttons[i] = (Button) findViewById(resourceId);
             buttons[i].setOnClickListener(this);
         }
-        roundCount = 0;
+
         playerOneScoreCount = 0;
         playerTwoScoreCount = 0;
         activePlayer = true;
@@ -85,14 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.onlinebtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("app","going online");
-                OkHttpClient client = new OkHttpClient();
-                Request request = new Request.Builder().url("wss://echo.websocket.org").build();//"wss://echo.websocket.org""ws://localhost:3001/""ws://178.82.64.27:3001/""ws://moba1.herokuapp.com/"
-                webSocket = client.newWebSocket(request, new SocketListener());
-
-
-
-
+                goOnline();
             }
         });
 
@@ -108,28 +104,84 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    void goOnline(){
+        Log.i("app","going online");
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder().url("ws://80.218.189.9:3001").build();//"wss://echo.websocket.org""ws://localhost:3001/""ws://178.82.64.27:3001/""ws://moba1.herokuapp.com/"
+        webSocket = client.newWebSocket(request, new SocketListener());
+    }
+
     private class SocketListener extends WebSocketListener {
 
         @Override
         public void onOpen(WebSocket webSocket, Response response) {
             super.onOpen(webSocket, response);
             Log.i("app","onOpen success");
-
+            online = true;
 
         }
 
         @Override
         public void onMessage(WebSocket webSocket, final String text) {
             super.onMessage(webSocket, text);
+            Log.i("app","onMessage " + text);
+
+            String text2 = text.replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\\s", "").replace(" ", "").split("\"")[3];
+            String[] items = text2.split(",");
+            Log.i("app","text2: " + text2);
+            for (int i = 0; i < 9; i++) {
+                try {
+                    gameState[i] = Integer.parseInt(items[i]);
+                } catch (NumberFormatException nfe) {
+                    Log.i("app","error");
+                };
+            }
+
+
+            updateBoard();
+            showWinner();
+
+            if (!checkWinner()) {
+                activePlayer = !activePlayer;
+            }
 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.i("app","onMessage " + text);
+
 
                 }
             });
+        }
+    }
 
+    void send(){
+        try {
+            if(webSocket != null){
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("message", Arrays.toString(gameState));
+
+                webSocket.send(jsonObject.toString());
+                Log.i("app","sent msg");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //uses the board array to update the graphics
+    public void updateBoard(){
+        int[] btns = {R.id.btn_0,R.id.btn_1,R.id.btn_2,R.id.btn_3,R.id.btn_4,R.id.btn_5,R.id.btn_6,R.id.btn_7,R.id.btn_8};
+
+        for (int i = 0;i<9;i++){
+            Button current = (Button) findViewById(btns[i]);
+            if(gameState[i] == 0){
+                current.setText("X");
+                current.setTextColor(Color.parseColor("#FFC34A"));
+            } else if(gameState[i] == 1) {
+                current.setText("O");
+                current.setTextColor(Color.parseColor("#70FFEA"));
+            }
         }
     }
 
@@ -139,50 +191,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
 
-        try {
-            if(webSocket != null){
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("message", "2,2,2,2,2,2,2,2,2");
-
-                webSocket.send(jsonObject.toString());
-                Log.i("app","sent msg");
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-
         String buttonId = v.getResources().getResourceEntryName(v.getId());
         int gameStatePointer = Integer.parseInt(buttonId.substring(buttonId.length() - 1, buttonId.length()));
 
         if (activePlayer) {
-            ((Button) v).setText("X");
-            ((Button) v).setTextColor(Color.parseColor("#FFC34A"));
             gameState[gameStatePointer] = 0;
         } else {
-            ((Button) v).setText("O");
-            ((Button) v).setTextColor(Color.parseColor("#70FFEA"));
             gameState[gameStatePointer] = 1;
         }
-        roundCount++;
 
+
+        send();
+        updateBoard();
+        showWinner();
+    }
+
+    boolean checkIfTie(){
+        int sum = 0;
+        for (int i = 0;i<9;i++){
+            sum+= gameState[i] == 2 ? 0 : 1;
+        }
+        return sum == 9;
+    }
+
+    void showWinner(){
         if (checkWinner()) {
             if(activePlayer){
                 playerOneScoreCount++;
                 updatePlayerScore();
                 Toast.makeText(this, "Player 1 Won!", Toast.LENGTH_SHORT).show();
                 playAgain();
+                goOnline();
             }else {
                 playerTwoScoreCount++;
                 updatePlayerScore();
                 Toast.makeText(this, "Player 2 Won!", Toast.LENGTH_SHORT).show();
                 playAgain();
+                goOnline();
             }
-        }else if(roundCount == 9){
-        playAgain();
-        Toast.makeText(this, "No Winner!", Toast.LENGTH_SHORT).show();
+        }else if(checkIfTie()){
+            playAgain();
+            Toast.makeText(this, "No Winner!", Toast.LENGTH_SHORT).show();
+            goOnline();
         }else {
-            activePlayer = !activePlayer;
+            if(online)activePlayer = !activePlayer;
         }
 
         if(playerOneScoreCount > playerTwoScoreCount){
@@ -192,9 +244,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }else {
             playerStatus.setText("");
         }
-
-
-
     }
 
     public boolean checkWinner(){
@@ -216,12 +265,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void playAgain(){
-        roundCount = 0;
         activePlayer = true;
 
         for(int i=0; i<buttons.length; i++){
             gameState[i] = 2;
             buttons[i].setText("");
         }
+        send();
     }
 }
