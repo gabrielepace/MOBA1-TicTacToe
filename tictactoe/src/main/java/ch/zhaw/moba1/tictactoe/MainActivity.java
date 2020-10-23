@@ -13,9 +13,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.Arrays;
 
 import okhttp3.OkHttpClient;
@@ -140,14 +137,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    void send(){
+    void sendBoard(){
         try {
             if(webSocket != null){
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("message", Arrays.toString(gameState));
-
-                webSocket.send(jsonObject.toString());
-                Log.i("app","sent msg");
+                String board = Arrays.toString(gameState);
+                jsonObject.put("message", board);
+                Boolean a = webSocket.send(jsonObject.toString());
+                Log.i("app: ","board sent");
+                Log.i("board sent was : ",board);
+                Log.i("send-successful: ",a.toString());
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -186,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
 
-        send();
+        sendBoard();
         updateBoard();
         showWinner();
     }
@@ -256,6 +255,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             gameState[i] = 2;
             buttons[i].setText("");
         }
-        send();
+        sendBoard();
     }
 }
