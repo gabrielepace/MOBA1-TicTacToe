@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -104,21 +105,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         @Override
-        public void onMessage(WebSocket webSocket, final String text) {
-            super.onMessage(webSocket, text);
-            Log.i("app","onMessage " + text);
+        public void onMessage(WebSocket webSocket, final String boardRecieved) {
+            super.onMessage(webSocket, boardRecieved);
+            Log.i("app","new board " + boardRecieved);
+            Log.i("app","old gameState " + Arrays.toString(gameState));
+            try {
+                JSONObject newBoard = new JSONObject(boardRecieved);
+                JSONArray newGameState  = (JSONArray) newBoard.get("message");
+                for (int i = 0; i < gameState.length; i++) {
+                    gameState[i] = (int)newGameState.get(i);
+                }
+                Log.i("app","new gameState " + Arrays.toString(gameState));
 
-            String text2 = text.replaceAll("\\[", "").replaceAll("\\]", "").replaceAll("\\s", "").replace(" ", "").split("\"")[3];
-            String[] items = text2.split(",");
-            Log.i("app","text2: " + text2);
-            for (int i = 0; i < 9; i++) {
-                try {
-                    gameState[i] = Integer.parseInt(items[i]);
-                } catch (NumberFormatException nfe) {
-                    Log.i("app","error");
-                };
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-
 
             updateBoard();
             showWinner();
@@ -141,11 +142,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try {
             if(webSocket != null){
                 JSONObject jsonObject = new JSONObject();
+                JSONArray jsonArray = new JSONArray(gameState);
                 String board = Arrays.toString(gameState);
-                jsonObject.put("message", board);
+                jsonObject.put("message", jsonArray);
                 Boolean a = webSocket.send(jsonObject.toString());
                 Log.i("app: ","board sent");
-                Log.i("board sent was : ",board);
+                Log.i("board was : ",board);
                 Log.i("send-successful: ",a.toString());
             }
         } catch (JSONException e) {
