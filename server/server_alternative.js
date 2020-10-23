@@ -10,19 +10,18 @@ server.listen(3001, ()=>{
 wsServer = new SocketServer({httpServer:server})
 
 var board = "";
-const connections = []
+var connections = []
 
-wsServer.on('request', (req) => {
-    const connection = req.accept()
-    console.log('new connection')
-    connections.push(connection)
+wsServer.on('request', function(request) {
+    var connection = request.accept();
+    connections.push(connection);
+    console.log((new Date()) + ' Connection accepted.');
 
-    connection.on('message', (b) => {
-		board = b;
+    connection.on('message', function(message) {
         connections.forEach(element => {
             if (element != connection)
-                element.sendUTF(board)
-        })
+            element.sendUTF(message.utf8Data);
+          })
     })
 
     connection.on('close', (resCode, des) => {
