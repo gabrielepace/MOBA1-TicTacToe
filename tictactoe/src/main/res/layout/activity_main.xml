@@ -10,12 +10,12 @@
         android:id="@+id/playerOne"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Player 1"
-        android:layout_marginTop="5dp"
         android:layout_marginLeft="15dp"
+        android:layout_marginTop="5dp"
+        android:text="Player X"
         android:textSize="20sp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/playerOneScore"
@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="320dp"
         android:layout_marginTop="4dp"
-        android:text="Player 2"
+        android:text="Player O"
         android:textSize="20sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -174,12 +174,20 @@
 
     <Button
         android:id="@+id/onlinebtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="28dp"
-        android:text="go online (WIP)"
+        android:layout_width="150dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="8dp"
+        android:text="go online"
         app:layout_constraintStart_toStartOf="@+id/reset"
+        app:layout_constraintTop_toBottomOf="@+id/reset" />
+
+    <TextView
+        android:id="@+id/connected"
+        android:layout_width="85dp"
+        android:layout_height="22dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintStart_toEndOf="@+id/onlinebtn"
         app:layout_constraintTop_toBottomOf="@+id/reset" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -24,13 +24,13 @@ import okhttp3.WebSocketListener;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private TextView playerOneScore, playerTwoScore, playerStatus;
+    private TextView playerOneScore, playerTwoScore, playerStatus, connected;
     private Button[] buttons = new Button[9];
     private Button reset;
 
     private int playerOneScoreCount, playerTwoScoreCount;
 
-    public boolean activePlayer;
+    public boolean activePlayerX;
 
     public int[] gameState = {2,2,2,2,2,2,2,2,2};
 
@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private WebSocket webSocket;
 
     boolean online = false;
-
+    boolean alreadyPlayed = false;
 
 
     @Override
@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         playerOneScore = (TextView) findViewById(R.id.playerOneScore);
         playerTwoScore = (TextView) findViewById(R.id.playerTwoScore);
         playerStatus = (TextView) findViewById(R.id.playerStatus);
+        connected = (TextView) findViewById(R.id.connected);
 
         reset = (Button) findViewById(R.id.reset);
 
@@ -66,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         playerOneScoreCount = 0;
         playerTwoScoreCount = 0;
-        activePlayer = true;
+        activePlayerX = true;
 
         findViewById(R.id.onlinebtn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,10 +80,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onClick(View v) {
                 playAgain();
-                playerOneScoreCount = 0;
-                playerTwoScoreCount = 0;
-                playerStatus.setText("");
-                updatePlayerScore();
+//                playerOneScoreCount = 0;
+//                playerTwoScoreCount = 0;
+//                playerStatus.setText("");
+//                updatePlayerScore();
             }
         });
     }
@@ -101,37 +102,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             super.onOpen(webSocket, response);
             Log.i("app","onOpen success");
             online = true;
-
+            connected.setText("Connected");
         }
 
         @Override
         public void onMessage(WebSocket webSocket, final String boardRecieved) {
             super.onMessage(webSocket, boardRecieved);
-            Log.i("app","new board " + boardRecieved);
-            Log.i("app","old gameState " + Arrays.toString(gameState));
+//            Log.i("app","new board " + boardRecieved);
+//            Log.i("app","old gameState " + Arrays.toString(gameState));
             try {
                 JSONObject newBoard = new JSONObject(boardRecieved);
                 JSONArray newGameState  = (JSONArray) newBoard.get("message");
+                int zeroes = 0;//X, represented by 0
+                int ones = 0;//O, represented by 1
                 for (int i = 0; i < gameState.length; i++) {
                     gameState[i] = (int)newGameState.get(i);
+                    if(gameState[i] == 0)zeroes++;
+                    if(gameState[i] == 1)ones++;
                 }
-                Log.i("app","new gameState " + Arrays.toString(gameState));
+                activePlayerX = ones>=zeroes;//true => X
+                //Log.i("app","new gameState " + Arrays.toString(gameState));
 
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
             updateBoard();
-            showWinner();
+            alreadyPlayed = false;
 
-            if (!checkWinner()) {
-                activePlayer = !activePlayer;
-            }
+
+//            if (!checkWinner()) {
+//                activePlayer = !activePlayer;
+//            }
 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-
+                    showWinner();
+                    Log.i("app","checking winner after onMessage: " + checkWinner());
+                    Log.i("app","new gameState after onMessage: " + Arrays.toString(gameState));
 
                 }
             });
@@ -146,9 +155,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String board = Arrays.toString(gameState);
                 jsonObject.put("message", jsonArray);
                 Boolean a = webSocket.send(jsonObject.toString());
-                Log.i("app: ","board sent");
-                Log.i("board was : ",board);
-                Log.i("send-successful: ",a.toString());
+//                Log.i("app: ","board sent");
+//                Log.i("board was : ",board);
+//                Log.i("send-successful: ",a.toString());
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -167,6 +176,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } else if(gameState[i] == 1) {
                 current.setText("O");
                 current.setTextColor(Color.parseColor("#70FFEA"));
+            } else {
+                current.setText("");
             }
         }
     }
@@ -176,16 +187,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (!((Button) v).getText().toString().equals("")) {
             return;
         }
+        if(online && alreadyPlayed){
+            return;
+        }
+        if(!online){
+            activePlayerX= !activePlayerX;
+        }
 
         String buttonId = v.getResources().getResourceEntryName(v.getId());
         int gameStatePointer = Integer.parseInt(buttonId.substring(buttonId.length() - 1, buttonId.length()));
 
-        if (activePlayer) {
+        if (activePlayerX) {
             gameState[gameStatePointer] = 0;
         } else {
             gameState[gameStatePointer] = 1;
         }
-
+        alreadyPlayed=true;
 
         sendBoard();
         updateBoard();
@@ -201,45 +218,48 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     void showWinner(){
-        if (checkWinner()) {
-            if(activePlayer){
+        if (checkWinner()!=2) {
+            if(checkWinner()==0){
                 playerOneScoreCount++;
                 updatePlayerScore();
-                Toast.makeText(this, "Player 1 Won!", Toast.LENGTH_SHORT).show();
-                playAgain();
-                goOnline();
+                playerStatus.setText("Player X won last game!");
+                Toast.makeText(this, "Player X Won!", Toast.LENGTH_SHORT).show();
+//                playAgain();
+//                goOnline();
             }else {
                 playerTwoScoreCount++;
                 updatePlayerScore();
-                Toast.makeText(this, "Player 2 Won!", Toast.LENGTH_SHORT).show();
-                playAgain();
-                goOnline();
+                playerStatus.setText("Player O won last game!");
+                Toast.makeText(this, "Player O Won!", Toast.LENGTH_SHORT).show();
+//                playAgain();
+//                goOnline();
             }
         }else if(checkIfTie()){
-            playAgain();
+            playerStatus.setText("Nobody won last game");
             Toast.makeText(this, "No Winner!", Toast.LENGTH_SHORT).show();
-            goOnline();
+//            playAgain();
+//            goOnline();
         }else {
-            if(online)activePlayer = !activePlayer;
+            //if(online) activePlayerX = !activePlayerX;
         }
 
-        if(playerOneScoreCount > playerTwoScoreCount){
-            playerStatus.setText("Player 1 is Winning!");
-        }else if(playerTwoScoreCount > playerOneScoreCount){
-            playerStatus.setText("Player 2 is Winning!");
-        }else {
-            playerStatus.setText("");
-        }
+//        if(playerOneScoreCount > playerTwoScoreCount){
+//            playerStatus.setText("Player X is Winning!");
+//        }else if(playerTwoScoreCount > playerOneScoreCount){
+//            playerStatus.setText("Player O is Winning!");
+//        }else {
+//            playerStatus.setText("");
+//        }
     }
 
-    public boolean checkWinner(){
-        boolean winnerResult = false;
+    public int checkWinner(){
+        int winnerResult = 2;//2 means nobody won yet, 0 = X won, 1 = O won
 
         for(int[] winningPosition: winningPositions){
             if((gameState[winningPosition[0]] == gameState[winningPosition[1]]) &&
                     (gameState[winningPosition[1]] == gameState[winningPosition[2]]) &&
                             (gameState[winningPosition[2]] != 2)){
-                winnerResult = true;
+                winnerResult = gameState[winningPosition[2]];
             }
         }
         return winnerResult;
@@ -251,12 +271,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void playAgain(){
-        activePlayer = true;
+
 
         for(int i=0; i<buttons.length; i++){
             gameState[i] = 2;
             buttons[i].setText("");
         }
         sendBoard();
+        alreadyPlayed=false;
+        activePlayerX = true;
+
+
     }
 }
