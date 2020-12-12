@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onClick(View v) {
                 resetPlayerScore();
+                playAgain();
                 goOnline();
             }
         });
@@ -225,6 +226,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 updatePlayerScore();
                 playerStatus.setText("Player X won last game!");
                 Toast.makeText(this, "Player X Won!", Toast.LENGTH_SHORT).show();
+
 //                playAgain();
 //                goOnline();
             }else {
@@ -232,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 updatePlayerScore();
                 playerStatus.setText("Player O won last game!");
                 Toast.makeText(this, "Player O Won!", Toast.LENGTH_SHORT).show();
-//                playAgain();
+//                  playAgain();
 //                goOnline();
             }
         }else if(checkIfTie()){
@@ -276,12 +278,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         playerTwoScore.setText("0");
         playerOneScoreCount = 0;
         playerTwoScoreCount = 0;
-
     }
 
+
+
     public void playAgain(){
-
-
         for(int i=0; i<buttons.length; i++){
             gameState[i] = 2;
             buttons[i].setText("");
@@ -289,7 +290,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sendBoard();
         alreadyPlayed=false;
         activePlayerX = true;
-
-
     }
 }
