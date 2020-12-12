@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.onlinebtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                resetPlayerScore();
                 goOnline();
             }
         });
@@ -268,6 +269,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void updatePlayerScore(){
         playerOneScore.setText(Integer.toString(playerOneScoreCount));
         playerTwoScore.setText(Integer.toString(playerTwoScoreCount));
+    }
+
+    public void resetPlayerScore(){
+        playerOneScore.setText("0");
+        playerTwoScore.setText("0");
+        playerOneScoreCount = 0;
+        playerTwoScoreCount = 0;
+
     }
 
     public void playAgain(){
